@@ -605,9 +605,9 @@ body {
 <h1 id="filer">filer</h1>
 <p>The <code>filer</code> R package provides functions for easily constructing paths and querying for files that may or may not be compressed (with .gz extension).</p>
 <h2 id="installation">Installation</h2>
-<p>You can install filer from <a href="https://github.com/OchoaLab/">GitHub</a> using the R commands:</p>
+<p>You can install filer from <a href="https://github.com/alexviiia/">GitHub</a> using the R commands:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(devtools)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">install_github</span>(<span class="st">&quot;OchoaLab/filer&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">install_github</span>(<span class="st">&quot;alexviiia/filer&quot;</span>)</a></code></pre></div>
 <h2 id="example">Example</h2>
 <p>The default mode of <code>filer</code> is to construct file path strings:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># load package</span></a>
@@ -643,56 +643,36 @@ body {
 <a class="sourceLine" id="cb2-31" data-line-number="31"><span class="kw">filer</span>(<span class="st">'myfile.blah'</span>, <span class="st">''</span>)</a>
 <a class="sourceLine" id="cb2-32" data-line-number="32"><span class="co">#&gt; [1] &quot;myfile.blah&quot;</span></a></code></pre></div>
 <p>There are two modes that make this much more useful in practice. Both of these test for file existence, looking for compressed files when the regular versions don’t exist, and let you know when neither files are found.</p>
-<p>First is the “logical” mode, which returns a boolean for whether a file exists. Note that if we’re testing for <code>file.txt</code>, this function returns <code>TRUE</code> if either <code>file.txt</code> or <code>file.txt.gz</code> exist, and <code>FALSE</code> only if both are missing.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># this file 'myfile.txt' doesn't exist</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">filer</span>(<span class="st">'myfile'</span>, <span class="dt">logical=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#&gt; [1] FALSE</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co"># create a temporary file for this example</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">base &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">tempdir</span>(), <span class="st">'myfile'</span>)</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7">fileTmp &lt;-<span class="st"> </span><span class="kw">paste0</span>(base, <span class="st">'.txt'</span>)</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">file.create</span>(fileTmp)</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="co"># test for file (exclude extension).  Since this really exists it'll return TRUE!</span></a>
-<a class="sourceLine" id="cb3-11" data-line-number="11"><span class="kw">filer</span>( base, <span class="dt">logical=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-12" data-line-number="12"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb3-13" data-line-number="13"><span class="co"># remove file</span></a>
-<a class="sourceLine" id="cb3-14" data-line-number="14"><span class="kw">file.remove</span>(fileTmp)</a>
-<a class="sourceLine" id="cb3-15" data-line-number="15"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb3-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb3-17" data-line-number="17"><span class="co"># create another temporary file that has compressed extension</span></a>
-<a class="sourceLine" id="cb3-18" data-line-number="18"><span class="co"># reuse base</span></a>
-<a class="sourceLine" id="cb3-19" data-line-number="19">fileTmpGz &lt;-<span class="st"> </span><span class="kw">paste0</span>(base, <span class="st">'.txt.gz'</span>)</a>
-<a class="sourceLine" id="cb3-20" data-line-number="20"><span class="kw">file.create</span>(fileTmpGz)</a>
-<a class="sourceLine" id="cb3-21" data-line-number="21"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb3-22" data-line-number="22"><span class="co"># test for file (exclude extensions).  Since this really exists it'll return TRUE!</span></a>
-<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="co"># filer finds compressed version even though we didn't say it'd be compressed</span></a>
-<a class="sourceLine" id="cb3-24" data-line-number="24"><span class="kw">filer</span>( base, <span class="dt">logical=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-25" data-line-number="25"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb3-26" data-line-number="26"><span class="co"># remove file</span></a>
-<a class="sourceLine" id="cb3-27" data-line-number="27"><span class="kw">file.remove</span>(fileTmpGz)</a>
-<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="co">#&gt; [1] TRUE</span></a></code></pre></div>
-<p>The second is “exists” mode, which returns either the uncompressed or compressed file path if it exists, but stops with an informative error message if the file does not exist. This is very useful when we want to load a file, we’re not sure if it was compressed or not, but definitely want things to stop if the file cannot be found (in either of uncompressed or compressed versions).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># this file 'myfile.txt' doesn't exist</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">filer</span>(<span class="st">'myfile'</span>, <span class="dt">exists=</span><span class="ot">TRUE</span>)</a></code></pre></div>
-<div class="alert alert-danger">
-
-<p>#&gt; Error in filer(“myfile”, exists = TRUE): Fatal in filer: could not find “myfile.txt” or its gzip version!</p>
-</div>
-
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co"># create temporary file with compressed extension</span></a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co"># reusing earlier base and fileTmpGz</span></a>
-<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw">file.create</span>(fileTmpGz) <span class="co"># create again</span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co"># test for file (exclude extensions).</span></a>
-<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="co"># Returns path of the file that exists (uncompressed if found, otherwise compressed if that is found)</span></a>
-<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co"># filer finds compressed version even though we didn't say it'd be compressed</span></a>
-<a class="sourceLine" id="cb5-9" data-line-number="9"><span class="kw">filer</span>( base, <span class="dt">exists=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb5-10" data-line-number="10"><span class="co">#&gt; [1] &quot;/tmp/Rtmppm6TTr/myfile.txt.gz&quot;</span></a>
-<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="co"># remove file</span></a>
-<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="kw">file.remove</span>(fileTmpGz)</a>
-<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="co">#&gt; [1] TRUE</span></a></code></pre></div>
+<p>Let’s quickly create a temporary file that really exists, so you can see what happens when you test for it.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># &quot;base&quot; of file to test for (without extensions)</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">base &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">tempdir</span>(), <span class="st">'myfile'</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co"># full path of file, with standard plus compressed extension</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">fileTmp &lt;-<span class="st"> </span><span class="kw">paste0</span>(base, <span class="st">'.txt.gz'</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co"># create file for this example</span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="kw">file.create</span>(fileTmp)</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co">#&gt; [1] TRUE</span></a></code></pre></div>
+<p>The first mode is the “logical” mode, which returns a boolean for whether a file exists. Note that if we’re testing for <code>file.txt</code>, this function returns <code>TRUE</code> if either <code>file.txt</code> or <code>file.txt.gz</code> exist, and <code>FALSE</code> only if both are missing.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># this file 'fakeFile.txt' doesn't exist</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">filer</span>(<span class="st">'fakeFile'</span>, <span class="dt">logical=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">#&gt; [1] FALSE</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co"># test for file that does exist (exclude extensions).</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co"># Although base.txt doesn't exist, compressed version base.txt.gz does, so this returns TRUE!</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="kw">filer</span>(base, <span class="dt">logical=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co">#&gt; [1] TRUE</span></a></code></pre></div>
+<p>The second mode is the “exists” mode, which returns either the uncompressed or compressed file path if it exists, but stops with an informative error message if the file does not exist. This is very useful when we want to load a file, we’re not sure if it was compressed or not, but definitely want things to stop if the file cannot be found (in either of uncompressed or compressed versions).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># this file 'fakeFile.txt' doesn't exist</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">filer</span>(<span class="st">'fakeFile'</span>, <span class="dt">exists=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">#&gt; Error in filer(&quot;fakeFile&quot;, exists = TRUE): Fatal in filer: could not find &quot;fakeFile.txt&quot; or its gzip version!</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co"># test for file that does exist (exclude extensions).</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co"># Although base.txt doesn't exist, compressed version base.txt.gz does (returns this version)</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="kw">filer</span>(base, <span class="dt">exists=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co">#&gt; [1] &quot;/tmp/RtmpimIl6F/myfile.txt.gz&quot;</span></a></code></pre></div>
+<p>Lastly, let’s cleanup your file system.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># remove temporary file</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">file.remove</span>(fileTmp)</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">#&gt; [1] TRUE</span></a></code></pre></div>
 
 </body>
 </html>

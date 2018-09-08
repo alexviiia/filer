@@ -9,12 +9,12 @@ extension).
 
 ## Installation
 
-You can install filer from [GitHub](https://github.com/OchoaLab/) using
+You can install filer from [GitHub](https://github.com/alexviiia/) using
 the R commands:
 
 ``` r
 library(devtools)
-install_github("OchoaLab/filer")
+install_github("alexviiia/filer")
 ```
 
 ## Example
@@ -61,73 +61,57 @@ these test for file existence, looking for compressed files when the
 regular versions don’t exist, and let you know when neither files are
 found.
 
-First is the “logical” mode, which returns a boolean for whether a file
-exists. Note that if we’re testing for `file.txt`, this function returns
-`TRUE` if either `file.txt` or `file.txt.gz` exist, and `FALSE` only if
-both are missing.
+Let’s quickly create a temporary file that really exists, so you can see
+what happens when you test for it.
 
 ``` r
-# this file 'myfile.txt' doesn't exist
-filer('myfile', logical=TRUE)
-#> [1] FALSE
-
-# create a temporary file for this example
+# "base" of file to test for (without extensions)
 base <- file.path( tempdir(), 'myfile')
-fileTmp <- paste0(base, '.txt')
+# full path of file, with standard plus compressed extension
+fileTmp <- paste0(base, '.txt.gz')
+# create file for this example
 file.create(fileTmp)
 #> [1] TRUE
-# test for file (exclude extension).  Since this really exists it'll return TRUE!
-filer( base, logical=TRUE)
+```
+
+The first mode is the “logical” mode, which returns a boolean for
+whether a file exists. Note that if we’re testing for `file.txt`, this
+function returns `TRUE` if either `file.txt` or `file.txt.gz` exist, and
+`FALSE` only if both are missing.
+
+``` r
+# this file 'fakeFile.txt' doesn't exist
+filer('fakeFile', logical=TRUE)
+#> [1] FALSE
+
+# test for file that does exist (exclude extensions).
+# Although base.txt doesn't exist, compressed version base.txt.gz does, so this returns TRUE!
+filer(base, logical=TRUE)
 #> [1] TRUE
-# remove file
+```
+
+The second mode is the “exists” mode, which returns either the
+uncompressed or compressed file path if it exists, but stops with an
+informative error message if the file does not exist. This is very
+useful when we want to load a file, we’re not sure if it was compressed
+or not, but definitely want things to stop if the file cannot be found
+(in either of uncompressed or compressed versions).
+
+``` r
+# this file 'fakeFile.txt' doesn't exist
+filer('fakeFile', exists=TRUE)
+#> Error in filer("fakeFile", exists = TRUE): Fatal in filer: could not find "fakeFile.txt" or its gzip version!
+
+# test for file that does exist (exclude extensions).
+# Although base.txt doesn't exist, compressed version base.txt.gz does (returns this version)
+filer(base, exists=TRUE)
+#> [1] "/tmp/RtmpimIl6F/myfile.txt.gz"
+```
+
+Lastly, let’s cleanup your file system.
+
+``` r
+# remove temporary file
 file.remove(fileTmp)
-#> [1] TRUE
-
-# create another temporary file that has compressed extension
-# reuse base
-fileTmpGz <- paste0(base, '.txt.gz')
-file.create(fileTmpGz)
-#> [1] TRUE
-# test for file (exclude extensions).  Since this really exists it'll return TRUE!
-# filer finds compressed version even though we didn't say it'd be compressed
-filer( base, logical=TRUE)
-#> [1] TRUE
-# remove file
-file.remove(fileTmpGz)
-#> [1] TRUE
-```
-
-The second is “exists” mode, which returns either the uncompressed or
-compressed file path if it exists, but stops with an informative error
-message if the file does not exist. This is very useful when we want to
-load a file, we’re not sure if it was compressed or not, but definitely
-want things to stop if the file cannot be found (in either of
-uncompressed or compressed versions).
-
-``` r
-# this file 'myfile.txt' doesn't exist
-filer('myfile', exists=TRUE)
-```
-
-<div class="alert alert-danger">
-
-\#\> Error in filer(“myfile”, exists = TRUE): Fatal in filer: could not
-find “myfile.txt” or its gzip version\!
-
-</div>
-
-``` r
-
-# create temporary file with compressed extension
-# reusing earlier base and fileTmpGz
-file.create(fileTmpGz) # create again
-#> [1] TRUE
-# test for file (exclude extensions).
-# Returns path of the file that exists (uncompressed if found, otherwise compressed if that is found)
-# filer finds compressed version even though we didn't say it'd be compressed
-filer( base, exists=TRUE)
-#> [1] "/tmp/Rtmppm6TTr/myfile.txt.gz"
-# remove file
-file.remove(fileTmpGz)
 #> [1] TRUE
 ```

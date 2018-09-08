@@ -1,0 +1,59 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# filer
+
+The `filer` R package provides functions for easily constructing paths and querying for files that may or may not be compressed (with .gz extension).
+
+## Installation
+
+You can install filer from [GitHub](https://github.com/OchoaLab/) using the R commands:
+
+``` r
+library(devtools)
+install_github("OchoaLab/filer")
+```
+
+## Example
+
+The default mode of `filer` is to construct file path strings:
+
+```{r example}
+# a file with standard .txt extension:
+filer('myfile')
+
+# change extension
+filer('myfile', 'pdf')
+
+# no extension
+filer('myfile', '')
+
+# compressed version
+filer('myfile', gzip=TRUE)
+
+# compressed and different extension
+filer('myfile', 'yml', gzip=TRUE)
+
+# compressed but no other extension
+filer('myfile', '', gzip=TRUE)
+
+# no special treatment for periods in name (not assumed to be existing extensions)
+filer('myfile.blah')
+filer('myfile.blah', '')
+```
+
+There are two modes that make this much more useful in practice.
+Both of these test for file existence, looking for compressed files when the regular versions don't exist, and let you know when neither files are found.
+
+First is the "logical" mode, which returns a boolean for whether a file exists.

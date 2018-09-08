@@ -1,0 +1,47 @@
+filer <- function(name, ext='txt', gzip=TRUE, read=FALSE, exists=FALSE, verbose=TRUE) {
+    ## return full path, with extension (but possibly missing compressed extension)
+    ## if read, looks for real file (compressed or not) and dies if it's not found unless exists is TRUE
+    ## if exists, returns if file exists or not! (doesn't die but runs thorough test for file existence)
+    if (ext != '') {
+        ## blank extensions means nothing is appended
+        ## otherwise add a period before extension, all of which will be appended below
+        ext <- paste0('.', ext)
+    }
+    fi <- paste0(name, ext)
+    if (gzip) {
+        # force to use gz extension (required for writing gz files, won't do automatically)
+        fi <- paste0(fi, '.gz') # add compressed extension
+    }
+    if (read || exists) { # trigger this behavior if we want the exists output too!
+        # triggers search for either existing file or existing compressed file, dying if neither is present!
+        if (!file.exists(fi)) {
+            if (gzip) {
+                # means we're already looking for a compressed version, so die without other tries (and give informative message)
+                if (exists) {
+                    return(FALSE)
+                } else {
+                    stop('Error: could not find "', fi, '"!')
+                }
+            } else {
+                # means we've only looked for regular (uncompressed) version
+                fiGz <- paste0(fi, '.gz') # alternative path
+                if (file.exists(fiGz)) {
+                    fi <- fiGz # use the compressed version as the version to read
+                } else {
+                    if (exists) {
+                        return(FALSE)
+                    } else {
+                        stop('Error: could not find "', fi, '" or its gzip version!')
+                    }
+                }
+            }
+        }
+    }
+    if (exists) {
+        return(TRUE)
+    } else {
+        if (read && verbose) message('Reading: ', fi) # include nice message if we're totaly reading file
+        return(fi) # this is what gets returned!
+    }
+}
+

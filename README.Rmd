@@ -1,0 +1,120 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+knitr::knit_hooks$set(
+   error = function(x, options) {
+     paste('\n\n<div class="alert alert-danger">',
+           gsub('##', '\n', gsub('^##\ Error', '**Error**', x)),
+           '</div>', sep = '\n')
+   },
+   warning = function(x, options) {
+     paste('\n\n<div class="alert alert-warning">',
+           gsub('##', '\n', gsub('^##\ Warning:', '**Warning**', x)),
+           '</div>', sep = '\n')
+   },
+   message = function(x, options) {
+     paste('\n\n<div class="alert alert-info">',
+           gsub('##', '\n', x),
+           '</div>', sep = '\n')
+   }
+)
+```
+# filer
+
+The `filer` R package provides functions for easily constructing paths and querying for files that may or may not be compressed (with .gz extension).
+
+## Installation
+
+You can install filer from [GitHub](https://github.com/OchoaLab/) using the R commands:
+
+``` r
+library(devtools)
+install_github("OchoaLab/filer")
+```
+
+## Example
+
+The default mode of `filer` is to construct file path strings:
+
+```{r example}
+# load package
+library(filer)
+
+# a file with standard .txt extension:
+filer('myfile')
+
+# change extension
+filer('myfile', 'pdf')
+
+# no extension
+filer('myfile', '')
+
+# compressed version
+filer('myfile', gzip=TRUE)
+
+# compressed and different extension
+filer('myfile', 'yml', gzip=TRUE)
+
+# compressed but no other extension
+filer('myfile', '', gzip=TRUE)
+
+# no special treatment for periods in name (not assumed to be existing extensions)
+filer('myfile.blah')
+filer('myfile.blah', '')
+```
+
+There are two modes that make this much more useful in practice.
+Both of these test for file existence, looking for compressed files when the regular versions don't exist, and let you know when neither files are found.
+
+First is the "logical" mode, which returns a boolean for whether a file exists.
+Note that if we're testing for `file.txt`, this function returns `TRUE` if either `file.txt` or `file.txt.gz` exist, and `FALSE` only if both are missing.
+```{r exampleL}
+# this file 'myfile.txt' doesn't exist
+filer('myfile', logical=TRUE)
+
+# create a temporary file for this example
+base <- file.path( tempdir(), 'myfile')
+fileTmp <- paste0(base, '.txt')
+file.create(fileTmp)
+# test for file (exclude extension).  Since this really exists it'll return TRUE!
+filer( base, logical=TRUE)
+# remove file
+file.remove(fileTmp)
+
+# create another temporary file that has compressed extension
+# reuse base
+fileTmpGz <- paste0(base, '.txt.gz')
+file.create(fileTmpGz)
+# test for file (exclude extensions).  Since this really exists it'll return TRUE!
+# filer finds compressed version even though we didn't say it'd be compressed
+filer( base, logical=TRUE)
+# remove file
+file.remove(fileTmpGz)
+```
+
+The second is "exists" mode, which returns either the uncompressed or compressed file path if it exists, but stops with an informative error message if the file does not exist.
+This is very useful when we want to load a file, we're not sure if it was compressed or not, but definitely want things to stop if the file cannot be found (in either of uncompressed or compressed versions).
+```{r exampleE, error = TRUE}
+# this file 'myfile.txt' doesn't exist
+filer('myfile', exists=TRUE)
+
+# create temporary file with compressed extension
+# reusing earlier base and fileTmpGz
+file.create(fileTmpGz) # create again
+# test for file (exclude extensions).
+# Returns path of the file that exists (uncompressed if found, otherwise compressed if that is found)
+# filer finds compressed version even though we didn't say it'd be compressed
+filer( base, exists=TRUE)
+# remove file
+file.remove(fileTmpGz)
+```
